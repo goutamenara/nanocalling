@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Latest compiled and minified CSS -->   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+
+    <title>Nanocall</title>
+    <style>
+        .material-icons{
+            display: inline-flex;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md bg-light navbar-light">
+        <!-- Brand -->
+        <a class="navbar-brand" href="index.html">
+            <i class="fa fa-cube" aria-hidden="true"></i>
+            Nanocall
+        </a>
+        <span class="ml-auto mr-1">
+            <span id="peer_status">
+                <i class="material-icons btn-outline-danger"  title="peer connection status" >highlight_off</i> 
+            </span>
+            &nbsp;
+            <span id="cloud_status">
+                <i class="material-icons btn-outline-danger"  title="cloud connection status">public</i> 
+            </span>
+        </span>
+    </nav>
+    <div class="container", style="margin-top:50px;">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Paste Connection Link">
+            <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="material-icons" >check</i>
+                </button> 
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+		
+        var peer = new Peer();
+        var conn, conn_status = false
+
+        peer.on('open', function(id) {
+            // Connected To Server and ID is generated....
+
+           document.getElementById('cloud_status').innerHTML = `
+           <i class="material-icons btn-outline-success"  title="cloud connection status">public</i> 
+           `;
+        
+        });
+
+        function connect_to_peer(){
+
+            var dest_peer_id = document.getElementById("dest_peer_id").value
+
+            conn = peer.connect(dest_peer_id);
+
+
+            conn.on('open', function() {
+
+                // Connected To Other User is generated....
+                var conn_stat_icon = document.getElementById("other_user_connection_status_icon")
+                conn_stat_icon.style.color = "#9fdf9f"
+                conn_stat_icon.title = "Connected To Other User"
+
+                conn_status = true
+
+                var after_conn_span = document.getElementById("after_connected_span")
+                after_conn_span.style.visibility = "hidden"
+                after_conn_span.style.display = "none"
+
+                var other_user_conn_span = document.getElementById("other_user_connected_span")
+                other_user_conn_span.style.visibility = "visible"
+                other_user_conn_span.style.display = "block"
+
+
+                start_video_call()
+
+                // Receive messages
+                //conn.on('data', function(data) {
+                //	console.log('Received', data);
+                //	document.getElementById("recieved_data").innerHTML += data+"<br />"
+                //});
+
+                
+            });
+
+        }
+
+
+        function start_video_call(){
+            if(conn_status){
+
+                var sourceVideo = document.querySelector("#sourceVideoElement");
+                var remoteVideo = document.querySelector("#remoteVideoElement")
+
+                var media_constraints = {
+                    video: true,
+                    audio: true
+                }
+
+                var dest_peer_id = document.getElementById("dest_peer_id").value
+                if (navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia(media_constraints)
+                    .then( (sourceStream) => {
+                        sourceVideo.srcObject = sourceStream;
+                        var call = peer.call(dest_peer_id, sourceStream);
+                        call.on('stream', function(remoteStream) {
+                            // `stream` is the MediaStream of the remote peer.
+                            // Here you'd add it to an HTML video/canvas element.
+                            remoteVideo.srcObject = remoteStream;
+                        });
+                    })
+                    .catch(function (error) {
+                        alert("Something Went Wrong.. Unable to Make Call")
+                        console.log("Something went wrong!");
+                        console.log(error)
+                    });
+                }
+                
+            }
+        }
+    
+    </script>
+
+
+</body>
+</html>
