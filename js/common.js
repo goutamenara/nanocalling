@@ -71,7 +71,7 @@ function create_share_links(url){
     <button class="btn btn-outline-primary" onclick="copy_text('`+url+`')">
         <i class="material-icons" >share</i>
     </button>&nbsp;
-    <a href="https://wa.me/?text=`+url+`" class="btn btn-outline-success">
+    <a href="https://api.whatsapp.com/send?text=`+url+`" data-action="share/whatsapp/share" class="btn btn-outline-success">
         <i class="fa fa-whatsapp" style="font-size:20px"></i>
     </a>
     `;
